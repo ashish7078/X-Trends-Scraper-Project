@@ -1,0 +1,64 @@
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+from django.utils import timezone
+from .models import TrendRun
+
+try:
+    from scraper import main as run_scrape
+except Exception:
+    run_scrape = None
+
+@require_GET
+def latest_trends(request):
+    t = TrendRun.objects.order_by("-run_timestamp").first()
+    if not t:
+        return JsonResponse({"error": "No trends found"}, status=404)
+    return JsonResponse({
+        "unique_id": str(t.id),
+        "trend1": t.trend1,
+        "trend2": t.trend2,
+        "trend3": t.trend3,
+        "trend4": t.trend4,
+        "trend5": t.trend5,
+        "ip_address": t.ip_address,
+        "scraped_at": t.run_timestamp.isoformat()
+    })
+
+@csrf_exempt
+@require_POST
+def scrape_save_trend(request):
+    if run_scrape is None:
+        return JsonResponse({"error": "scraper function not available"}, status=500)
+    try:
+        result = run_scrape() if callable(run_scrape) else None
+        if hasattr(result, "pk") and hasattr(result, "trend1"):
+            obj = result
+        else:
+            if isinstance(result, (list, tuple)):
+                trends_list = list(result)
+            else:
+                trends_list = []
+            while len(trends_list) < 5:
+                trends_list.append("")
+            client_ip = request.META.get("HTTP_X_FORWARDED_FOR", request.META.get("REMOTE_ADDR", ""))
+            obj = TrendRun.objects.create(
+                trend1=trends_list[0],
+                trend2=trends_list[1],
+                trend3=trends_list[2],
+                trend4=trends_list[3],
+                trend5=trends_list[4],
+                ip_address=client_ip
+            )
+        return JsonResponse({
+            "unique_id": str(obj.id),
+            "trend1": obj.trend1,
+            "trend2": obj.trend2,
+            "trend3": obj.trend3,
+            "trend4": obj.trend4,
+            "trend5": obj.trend5,
+            "ip_address": obj.ip_address,
+            "scraped_at": obj.run_timestamp.isoformat()
+        }, status=201)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
