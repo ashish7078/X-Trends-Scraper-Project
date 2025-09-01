@@ -1,19 +1,27 @@
 {
+  "version": 2,
   "builds": [
     {
-      "src": "xtrends_frontend/package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
-    },
-    {
-      "src": "api/wsgi.py",
+      "src": "wsgi.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "api/wsgi.py"
+      "dest": "wsgi.py"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "xtrends_frontend/build/static/$1"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "xtrends_frontend/build/manifest.json"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "xtrends_frontend/build/favicon.ico"
     },
     {
       "src": "/(.*)",
