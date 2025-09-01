@@ -150,25 +150,6 @@ def fetch_top_trends(driver):
     return trend_names[:5]
 
 
-# -----------------------------
-#  Save to PostgreSQL via ORM
-# -----------------------------
-def save_to_db(trends):
-    ip_address = socket.gethostbyname(socket.gethostname())
-
-    while len(trends) < 5:
-        trends.append("")
-
-    TrendRun.objects.create(
-        trend1=trends[0],
-        trend2=trends[1],
-        trend3=trends[2],
-        trend4=trends[3],
-        trend5=trends[4],
-        ip_address=ip_address,
-    )
-    print("✅ Data inserted into DB!")
-
 
 # -----------------------------
 #  Main Runner
@@ -178,7 +159,5 @@ def main():
 
     trends = fetch_top_trends(driver)
     print("🔥 Top 5 Trends:", trends)
-
-    save_to_db(trends)
     driver.quit()
     return trends
