@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 
-const API_BASE = ("http://127.0.0.1:8000").replace(/\/$/, "") + "/api";
+const API_BASE = ("https://x-trends-scraper-project-dogg.vercel.app/").replace(/\/$/, "") + "/api";
 
 function formatTime(iso) {
   try {
