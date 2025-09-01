@@ -1,0 +1,23 @@
+{
+  "builds": [
+    {
+      "src": "xtrends_frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "build" }
+    },
+    {
+      "src": "api/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/wsgi.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "xtrends_frontend/build/index.html"
+    }
+  ]
+}
