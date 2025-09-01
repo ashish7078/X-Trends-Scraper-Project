@@ -10,7 +10,7 @@ except Exception:
     run_scrape = None
 
 @require_GET
-def latest_trends(request):
+def latest_trends():
     t = TrendRun.objects.order_by("-run_timestamp").first()
     if not t:
         return JsonResponse({"error": "No trends found"}, status=404)
