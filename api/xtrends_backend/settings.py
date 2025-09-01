@@ -33,7 +33,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-secret-key")
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
 ALLOWED_HOSTS = [
-    'https://x-trends-scraper-project.vercel.app/',
+    'x-trends-scraper-project.vercel.app',
     '127.0.0.1',
     'localhost',
 ]
@@ -138,12 +138,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ✅ CORS Settings
-CORS_ALLOWED_ORIGINS = [
-    "https://x-trends-scraper-project.vercel.app/",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
+CORS_TRUSTED_ORIGINS = [
+    'https://x-trends-scraper-project.vercel.app',
+    'http://localhost:5173',
 ]
 
 # ✅ Development brute-force fix
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
