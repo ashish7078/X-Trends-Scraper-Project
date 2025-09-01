@@ -138,11 +138,11 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ✅ CORS Settings
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://x-trends-scraper-project.*\.vercel\.app$",
-    r"^http://localhost:.*$",
-    r"^http://127\.0\.0\.1:.*$",
-]
+# CORS_ALLOWED_ORIGIN_REGEXES = [
+#     r"^https://x-trends-scraper-project.*\.vercel\.app$",
+#     r"^http://localhost:.*$",
+#     r"^http://127\.0\.0\.1:.*$",
+# ]
 
 # ✅ Development brute-force fix
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
