@@ -2,30 +2,15 @@
   "version": 2,
   "builds": [
     {
-      "src": "wsgi.py",
-      "use": "@vercel/python"
+      "src": "api/wsgi.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "15mb" }
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "wsgi.py"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "xtrends_frontend/build/static/$1"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "xtrends_frontend/build/manifest.json"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "xtrends_frontend/build/favicon.ico"
-    },
-    {
       "src": "/(.*)",
-      "dest": "xtrends_frontend/build/index.html"
+      "dest": "api/wsgi.py"
     }
   ]
 }
