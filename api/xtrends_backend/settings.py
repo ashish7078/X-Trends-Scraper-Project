@@ -32,7 +32,11 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-secret-key")
 # Set to False for production
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = [os.getenv('VERCEL_URL', '.vercel.app')]
+ALLOWED_HOSTS = [
+    'x-trends-scraper-project.vercel.app',
+    '127.0.0.1',
+    'localhost',
+]
 
 
 # Application definition
