@@ -150,8 +150,6 @@ def fetch_top_trends(driver):
     return trend_names[:5]
 
 
-
-
 # -----------------------------
 #  Main Runner
 # -----------------------------
@@ -160,6 +158,5 @@ def main():
 
     trends = fetch_top_trends(driver)
     print("🔥 Top 5 Trends:", trends)
-
     driver.quit()
     return trends
