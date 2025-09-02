@@ -1,7 +1,6 @@
 import os
 import time
 import json
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import undetected_chromedriver as uc
@@ -14,7 +13,7 @@ def setup_django():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xtrends_backend.settings")
     django.setup()
     global TrendRun
-    from trends.models import TrendRun
+    from trends.models import TrendRun  # Import after setup
 
 # -----------------------------
 #  Driver Setup
@@ -93,13 +92,16 @@ def main():
     email = os.getenv("X_EMAIL")
     username = os.getenv("X_USERNAME")
     password = os.getenv("X_PASSWORD")
+
     driver = get_driver_with_session(email, username, password)
     trends = fetch_top_trends(driver)
     driver.quit()
+
     # Save to DB
     client_ip = "127.0.0.1"
     while len(trends) < 5:
         trends.append("")
+
     obj = TrendRun.objects.create(
         trend1=trends[0],
         trend2=trends[1],
