@@ -18,11 +18,8 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # --- CORRECT HOST AND CORS CONFIGURATION ---
 # This dynamically handles Vercel's URLs and your local environment.
-ALLOWED_HOSTS = [
-    '.vercel.app'
-    'localhost',
-    '127.0.0.1',
-]
+ALLOWED_HOSTS = ["x-trends-scraper-project-dogg.vercel.app", "localhost", "127.0.0.1"]
+
 # Application definition
 INSTALLED_APPS = [
     'corsheaders',
