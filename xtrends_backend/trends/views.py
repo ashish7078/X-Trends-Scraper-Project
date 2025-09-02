@@ -3,11 +3,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
 from .models import TrendRun
+from pathlib import Path
+import sys
 
-try:
-    from scraper import main as run_scrape
-except Exception:
-    run_scrape = None
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.append(str(BASE_DIR))
+
+from scraper import main as run_scrape
 
 @require_GET
 def latest_trends(request):
