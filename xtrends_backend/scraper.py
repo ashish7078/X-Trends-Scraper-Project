@@ -1,144 +1,111 @@
 import os
 import time
-import socket
-import undetected_chromedriver  as uc
-import django
 import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from dotenv import load_dotenv
+import undetected_chromedriver as uc
 
 # -----------------------------
 #  Django + Env Setup
 # -----------------------------
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xtrends_backend.settings")
-django.setup()
-
-from trends.models import TrendRun  # Import after django.setup()
-
-load_dotenv()
-X_EMAIL = os.getenv("X_EMAIL")
-X_USERNAME = os.getenv("X_USERNAME")
-X_PASSWORD = os.getenv("X_PASSWORD")
-
+def setup_django():
+    import django
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xtrends_backend.settings")
+    django.setup()
+    global TrendRun
+    from trends.models import TrendRun
 
 # -----------------------------
-#  Driver Setup with Options
-# -----------------------------
-# -----------------------------
-#  Driver Setup with Options
+#  Driver Setup
 # -----------------------------
 def create_driver():
     options = uc.ChromeOptions()
-
-    # These options are crucial for running in a serverless environment like Vercel
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    
-    # Initialize the driver correctly using uc.Chrome()
     driver = uc.Chrome(options=options)
-    
     return driver
 
-
 # -----------------------------
-#  Login and Save Cookies
+#  Login & Cookies
 # -----------------------------
-def login_and_save_cookies(driver):
+def login_and_save_cookies(driver, email, username, password):
     driver.get("https://x.com/login")
     time.sleep(3)
-
-    # Enter email
-    email_field = driver.find_element(By.NAME, "text")
-    email_field.send_keys(X_EMAIL)
-    email_field.send_keys(Keys.RETURN)
+    driver.find_element(By.NAME, "text").send_keys(email, Keys.RETURN)
     time.sleep(3)
-
-    # Enter username only if asked
     try:
-        username_field = driver.find_element(By.NAME, "text")
-        username_field.send_keys(X_USERNAME)
-        username_field.send_keys(Keys.RETURN)
+        driver.find_element(By.NAME, "text").send_keys(username, Keys.RETURN)
         time.sleep(3)
     except:
-        print("⚠ Username step skipped")
-
-    # Enter password
-    password_field = driver.find_element(By.NAME, "password")
-    password_field.send_keys(X_PASSWORD)
-    password_field.send_keys(Keys.RETURN)
+        pass
+    driver.find_element(By.NAME, "password").send_keys(password, Keys.RETURN)
     time.sleep(5)
-
-    # Save cookies
     cookies = driver.get_cookies()
     with open("x_cookies.json", "w") as f:
         json.dump(cookies, f)
-    print("💾 Cookies saved for future sessions!")
-
     return driver
 
-
-# -----------------------------
-#  Load Driver with Cookies
-# -----------------------------
-def get_driver_with_session():
+def get_driver_with_session(email, username, password):
     driver = create_driver()
     driver.get("https://x.com/")
-
     if os.path.exists("x_cookies.json"):
         try:
             with open("x_cookies.json", "r") as f:
                 cookies = json.load(f)
             for cookie in cookies:
-                # Selenium requires domain to be set correctly
-                if "sameSite" in cookie:
-                    if cookie["sameSite"] not in ["Strict", "Lax", "None"]:
-                        cookie.pop("sameSite")
+                if "sameSite" in cookie and cookie["sameSite"] not in ["Strict", "Lax", "None"]:
+                    cookie.pop("sameSite")
                 driver.add_cookie(cookie)
             driver.get("https://x.com/explore")
-            print("✅ Logged in using cookies!")
             return driver
-        except Exception as e:
-            print("⚠ Failed to load cookies, falling back to login:", e)
-
-    # If cookies don’t exist or fail → do normal login
-    driver = login_and_save_cookies(driver)
-    print("✅ Logged in with credentials!")
+        except:
+            pass
+    driver = login_and_save_cookies(driver, email, username, password)
     return driver
 
-
 # -----------------------------
-#  Scrape Top Trends
+#  Scrape Trends
 # -----------------------------
 def fetch_top_trends(driver):
     driver.get("https://x.com/explore")
     time.sleep(5)
-
     opened_div = driver.find_element(
         By.XPATH,
-        '//div[@aria-label="Timeline: Explore"]//div[@data-testid="cellInnerDiv"][6]',
+        '//div[@aria-label="Timeline: Explore"]//div[@data-testid="cellInnerDiv"][6]'
     )
-
     next_five_divs = opened_div.find_elements(
         By.XPATH,
-        'following-sibling::div[@data-testid="cellInnerDiv"][position() <= 5]',
+        'following-sibling::div[@data-testid="cellInnerDiv"][position() <= 5]'
     )
-
     texts = [div.text for div in next_five_divs if div.text.strip()]
     trend_names = [t.split("\n")[1] if "\n" in t else t for t in texts]
-
     return trend_names[:5]
 
-
 # -----------------------------
-#  Main Runner
+#  Main function exposed for Django
 # -----------------------------
 def main():
-    driver = get_driver_with_session()
-
+    setup_django()
+    from dotenv import load_dotenv
+    load_dotenv()
+    email = os.getenv("X_EMAIL")
+    username = os.getenv("X_USERNAME")
+    password = os.getenv("X_PASSWORD")
+    driver = get_driver_with_session(email, username, password)
     trends = fetch_top_trends(driver)
-    print("🔥 Top 5 Trends:", trends)
     driver.quit()
-    return trends
+    # Save to DB
+    client_ip = "127.0.0.1"
+    while len(trends) < 5:
+        trends.append("")
+    obj = TrendRun.objects.create(
+        trend1=trends[0],
+        trend2=trends[1],
+        trend3=trends[2],
+        trend4=trends[3],
+        trend5=trends[4],
+        ip_address=client_ip
+    )
+    return obj
