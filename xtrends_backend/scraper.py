@@ -1,6 +1,7 @@
 import os
 import time
 import socket
+import undetected_chromedriver  as uc
 import django
 import json
 from selenium import webdriver
@@ -25,39 +26,20 @@ X_PASSWORD = os.getenv("X_PASSWORD")
 # -----------------------------
 #  Driver Setup with Options
 # -----------------------------
+# -----------------------------
+#  Driver Setup with Options
+# -----------------------------
 def create_driver():
-    options = webdriver.ChromeOptions()
+    options = uc.ChromeOptions()
 
-    # Headless & performance
+    # These options are crucial for running in a serverless environment like Vercel
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1400,900")
-
-    # Anti-bot tweaks
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option("useAutomationExtension", False)
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120.0.0.0 Safari/537.36"
-    )
-
-    driver = webdriver.Chrome(options=options)
-
-    # Remove automation flag at runtime
-    driver.execute_cdp_cmd(
-        "Page.addScriptToEvaluateOnNewDocument",
-        {
-            "source": """
-                Object.defineProperty(navigator, 'webdriver', {
-                  get: () => undefined
-                })
-            """
-        },
-    )
+    
+    # Initialize the driver correctly using uc.Chrome()
+    driver = uc.Chrome(options=options)
+    
     return driver
 
 
