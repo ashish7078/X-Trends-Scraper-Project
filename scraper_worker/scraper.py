@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import json
 import django
@@ -10,6 +11,8 @@ from dotenv import load_dotenv
 # -----------------------------
 # Django + Env Setup
 # -----------------------------
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xtrends_backend.settings")
 django.setup()
 
