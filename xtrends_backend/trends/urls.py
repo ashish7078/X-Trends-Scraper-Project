@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path("latest-trends/", views.latest_trends, name="latest-trends"),
-    path("scrape-save-trend/", views.scrape_save_trend, name="scrape-save-trend"),
+    path("trigger-scrape/", views.trigger_scrape, name="trigger-scrape"),
 ]

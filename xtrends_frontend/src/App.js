@@ -64,7 +64,7 @@ export default function App() {
     setError("");
     setScraping(true);
     try {
-      const res = await fetch(`${API_BASE}/scrape-save-trend/`, { method: "POST" });
+      const res = await fetch(`${API_BASE}/trigger-scrape/`, { method: "POST" });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(text || "Scrape failed");
