@@ -1,41 +1,26 @@
 import os
-import sys
 import time
 import json
-import django
+import psycopg2
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from dotenv import load_dotenv
 
-# -----------------------------
-# Django + Env Setup
-# -----------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(BASE_DIR)
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xtrends_backend.settings")
-django.setup()
-
-from trends.models import TrendRun  # Import after django.setup()
 load_dotenv()
+
 X_EMAIL = os.getenv("X_EMAIL")
 X_USERNAME = os.getenv("X_USERNAME")
 X_PASSWORD = os.getenv("X_PASSWORD")
+DATABASE_URL = os.getenv("DATABASE_URL")  # NeonDB connection string
 
-# -----------------------------
-# Driver Setup with Options
-# -----------------------------
 def create_driver():
     options = uc.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    driver = uc.Chrome(options=options)
-    return driver
+    return uc.Chrome(options=options)
 
-# -----------------------------
-# Login and Save Cookies
-# -----------------------------
 def login_and_save_cookies(driver):
     driver.get("https://x.com/login")
     time.sleep(3)
@@ -74,12 +59,8 @@ def get_driver_with_session():
         except Exception as e:
             print("⚠ Failed to load cookies, falling back to login:", e)
 
-    driver = login_and_save_cookies(driver)
-    return driver
+    return login_and_save_cookies(driver)
 
-# -----------------------------
-# Scrape Top Trends
-# -----------------------------
 def fetch_top_trends(driver):
     driver.get("https://x.com/explore")
     time.sleep(5)
@@ -98,28 +79,27 @@ def fetch_top_trends(driver):
     trend_names = [t.split("\n")[1] if "\n" in t else t for t in texts]
     return trend_names[:5]
 
-# -----------------------------
-# Main Runner with DB Save
-# -----------------------------
+def save_to_db(trends):
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    while len(trends) < 5:
+        trends.append("")
+
+    cur.execute("""
+        INSERT INTO trends_trendrun (trend1, trend2, trend3, trend4, trend5, ip_address, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, NOW())
+    """, (trends[0], trends[1], trends[2], trends[3], trends[4], "127.0.0.1"))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    print("🔥 Top 5 Trends saved to DB:", trends)
+
 def main():
     driver = get_driver_with_session()
     trends = fetch_top_trends(driver)
     driver.quit()
+    save_to_db(trends)
 
-    # Ensure list has 5 items
-    while len(trends) < 5:
-        trends.append("")
-
-    # Save to DB
-    client_ip = "127.0.0.1"
-    obj = TrendRun.objects.create(
-        trend1=trends[0],
-        trend2=trends[1],
-        trend3=trends[2],
-        trend4=trends[3],
-        trend5=trends[4],
-        ip_address=client_ip
-    )
-
-    print("🔥 Top 5 Trends saved to DB:", trends)
-    return obj
+if __name__ == "__main__":
+    main()
