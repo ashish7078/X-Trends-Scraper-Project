@@ -5,6 +5,8 @@ services:
     plan: free
     buildCommand: |
       apt-get update
-      apt-get install -y chromium-browser chromium-chromedriver
+      apt-get install -y chromium chromium-driver
+      which chromium
+      which chromedriver
       pip install -r scraper_worker/requirements.txt
     startCommand: python scraper_worker/scraper.py
