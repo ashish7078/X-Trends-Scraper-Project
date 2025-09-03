@@ -20,7 +20,7 @@ def create_driver():
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    return uc.Chrome(driver_executable_path="/usr/bin/chromedriver", options=options)
+    return uc.Chrome(driver_executable_path="/usr/lib/chromium-browser/chromedriver", options=options)
 
 def login_and_save_cookies(driver):
     driver.get("https://x.com/login")
