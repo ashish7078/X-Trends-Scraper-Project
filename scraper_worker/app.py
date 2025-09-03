@@ -1,6 +1,5 @@
 from flask import Flask, jsonify
 import os
-
 from scraper import main as run_scraper
 
 app = Flask(__name__)

@@ -64,7 +64,7 @@ export default function App() {
     setError("");
     setScraping(true);
     try {
-      const res = await fetch(`${API_BASE}/trigger-scrape/`, { method: "POST" });
+      const res = await fetch(`https://x-trends-scraper-project.onrender.com/trigger-scrape/`, { method: "POST" });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(text || "Scrape failed");

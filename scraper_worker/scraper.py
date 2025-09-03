@@ -16,6 +16,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")  # NeonDB connection string
 
 def create_driver():
     options = uc.ChromeOptions()
+    options.binary_location = "/usr/bin/chromium-browser"
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
