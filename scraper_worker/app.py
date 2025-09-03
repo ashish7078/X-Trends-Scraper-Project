@@ -1,8 +1,19 @@
 from flask import Flask, jsonify
 import os
 from scraper import main as run_scraper
+import subprocess
 
 app = Flask(__name__)
+
+print("=== DEBUG: Checking installed paths ===")
+print("chromedriver:", subprocess.getoutput("which chromedriver"))
+print("chromium-browser:", subprocess.getoutput("which chromium-browser"))
+print("chromium:", subprocess.getoutput("which chromium"))
+print("ls /usr/bin:", subprocess.getoutput("ls /usr/bin | grep chrom"))
+
+@app.route("/")
+def home():
+    return jsonify({"message": "Worker is running!"})
 
 @app.route("/trigger-scrape", methods=["POST"])
 def trigger_scrape():
