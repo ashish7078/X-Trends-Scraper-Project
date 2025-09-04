@@ -11,13 +11,15 @@ RUN apt-get update && apt-get install -y wget unzip gnupg curl \
  && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
  && apt-get update && apt-get install -y google-chrome-stable \
  \
- # Get Chrome major version only (e.g., 140)
- && CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1) \
- && DRIVER_VERSION=$(wget -qO- "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION}") \
- && wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip" \
- && unzip chromedriver-linux64.zip -d /usr/local/bin/ \
- && rm chromedriver-linux64.zip \
- \
+# Get Chrome major version
+&& CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1) \
+# Fetch matching chromedriver for that major version
+&& DRIVER_VERSION=$(wget -qO- "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_$CHROME_VERSION") \
+&& wget -q "https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION/$DRIVER_VERSION/linux64/chromedriver-linux64.zip" \
+&& unzip chromedriver-linux64.zip -d /usr/local/bin/ \
+&& mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
+&& rm -rf chromedriver-linux64.zip /usr/local/bin/chromedriver-linux64 \
+
  # Cleanup
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 

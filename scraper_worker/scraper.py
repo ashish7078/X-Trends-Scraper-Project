@@ -28,12 +28,13 @@ def create_driver():
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-software-rasterizer")
 
-    # Use system Chrome + system Chromedriver
     return uc.Chrome(
         options=options,
+        driver_executable_path="/usr/local/bin/chromedriver",
         browser_executable_path="/usr/bin/google-chrome",
-        driver_executable_path="/usr/local/bin/chromedriver"
+        use_subprocess=True
     )
+
 
 
 def login_and_save_cookies(driver):
