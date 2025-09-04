@@ -1,24 +1,19 @@
 import os
 import time
-import json
 import psycopg2
+from dotenv import load_dotenv
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from dotenv import load_dotenv
-# from selenium import webdriver
-# from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.chrome.options import Options
-# from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 load_dotenv()
 
 X_EMAIL = os.getenv("X_EMAIL")
 X_USERNAME = os.getenv("X_USERNAME")
 X_PASSWORD = os.getenv("X_PASSWORD")
-DATABASE_URL = os.getenv("DATABASE_URL")  # NeonDB connection string
-
-import undetected_chromedriver as uc
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 def create_driver():
     options = uc.ChromeOptions()
@@ -27,7 +22,6 @@ def create_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-software-rasterizer")
-
     return uc.Chrome(
         options=options,
         driver_executable_path="/usr/local/bin/chromedriver",
@@ -35,51 +29,35 @@ def create_driver():
         use_subprocess=True
     )
 
-
-
-def login_and_save_cookies(driver):
+def login(driver):
     driver.get("https://x.com/login")
-    time.sleep(3)
 
+    WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.NAME, "text")))
     driver.find_element(By.NAME, "text").send_keys(X_EMAIL, Keys.RETURN)
-    time.sleep(3)
+    time.sleep(2)
 
     try:
+        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.NAME, "text")))
         driver.find_element(By.NAME, "text").send_keys(X_USERNAME, Keys.RETURN)
-        time.sleep(3)
+        time.sleep(2)
     except:
         print("⚠ Username step skipped")
 
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "password")))
     driver.find_element(By.NAME, "password").send_keys(X_PASSWORD, Keys.RETURN)
     time.sleep(5)
-
-    cookies = driver.get_cookies()
-    with open("x_cookies.json", "w") as f:
-        json.dump(cookies, f)
     return driver
 
-def get_driver_with_session():
+def get_driver_with_login():
     driver = create_driver()
-    driver.get("https://x.com/")
-
-    if os.path.exists("x_cookies.json"):
-        try:
-            with open("x_cookies.json", "r") as f:
-                cookies = json.load(f)
-            for cookie in cookies:
-                if "sameSite" in cookie and cookie["sameSite"] not in ["Strict", "Lax", "None"]:
-                    cookie.pop("sameSite")
-                driver.add_cookie(cookie)
-            driver.get("https://x.com/explore")
-            return driver
-        except Exception as e:
-            print("⚠ Failed to load cookies, falling back to login:", e)
-
-    return login_and_save_cookies(driver)
+    driver = login(driver)
+    return driver
 
 def fetch_top_trends(driver):
     driver.get("https://x.com/explore")
-    time.sleep(5)
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, '//div[@aria-label="Timeline: Explore"]'))
+    )
 
     opened_div = driver.find_element(
         By.XPATH,
@@ -98,6 +76,7 @@ def fetch_top_trends(driver):
 def save_to_db(trends):
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor()
+
     while len(trends) < 5:
         trends.append("")
 
@@ -112,7 +91,7 @@ def save_to_db(trends):
     print("🔥 Top 5 Trends saved to DB:", trends)
 
 def main():
-    driver = get_driver_with_session()
+    driver = get_driver_with_login()
     trends = fetch_top_trends(driver)
     driver.quit()
     save_to_db(trends)
