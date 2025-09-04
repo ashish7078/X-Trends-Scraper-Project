@@ -82,7 +82,7 @@ def save_to_db(trends):
         trends.append("")
 
     cur.execute("""
-        INSERT INTO trends_trendrun (trend1, trend2, trend3, trend4, trend5, ip_address, created_at)
+        INSERT INTO trends_trendrun (trend1, trend2, trend3, trend4, trend5, ip_address, run_timestamp)
         VALUES (%s, %s, %s, %s, %s, %s, NOW())
         RETURNING id
     """, (trends[0], trends[1], trends[2], trends[3], trends[4], "127.0.0.1"))

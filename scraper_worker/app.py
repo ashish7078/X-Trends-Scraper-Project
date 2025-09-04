@@ -1,15 +1,8 @@
 from flask import Flask, jsonify
 import os
 from scraper import main as run_scraper
-import subprocess
 
 app = Flask(__name__)
-
-print("=== DEBUG: Checking installed paths ===")
-print("chromedriver:", subprocess.getoutput("which chromedriver"))
-print("chromium-browser:", subprocess.getoutput("which chromium-browser"))
-print("chromium:", subprocess.getoutput("which chromium"))
-print("ls /usr/bin:", subprocess.getoutput("ls /usr/bin | grep chrom"))
 
 @app.route("/")
 def home():
@@ -18,12 +11,18 @@ def home():
 @app.route("/trigger-scrape", methods=["POST"])
 def trigger_scrape():
     try:
-        obj = run_scraper()
-        return jsonify({
-            "status": "success",
-            "trend_id": str(obj.id),
-            "trends": [obj.trend1, obj.trend2, obj.trend3, obj.trend4, obj.trend5]
-        })
+        trend_id = run_scraper()  # This returns UUID from save_to_db
+        if trend_id:
+            return jsonify({
+                "status": "success",
+                "trend_id": str(trend_id)
+            })
+        else:
+            return jsonify({
+                "status": "success",
+                "trend_id": None,
+                "message": "No trends were fetched"
+            })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
