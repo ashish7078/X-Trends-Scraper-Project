@@ -24,12 +24,9 @@ def create_driver():
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-background-networking")
     options.add_argument("--disable-software-rasterizer")
-    driver = uc.Chrome(
-        options=options,
-        driver_executable_path="/usr/local/bin/chromedriver",
-        browser_executable_path="/usr/bin/google-chrome",
-        use_subprocess=True
-    )
+
+    # Let undetected_chromedriver automatically find Chrome and driver
+    driver = uc.Chrome(options=options, use_subprocess=True, version_main=139)
     return driver
 
 def login(driver):

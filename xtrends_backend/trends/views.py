@@ -12,19 +12,19 @@ from . import scraper
 
 @require_GET
 def latest_trends(request):
-    t = TrendRun.objects.order_by("-run_timestamp").first()
-    if not t:
-        return JsonResponse({"error": "No trends found"}, status=404)
-    return JsonResponse({
-        "unique_id": str(t.id),
-        "trend1": t.trend1,
-        "trend2": t.trend2,
-        "trend3": t.trend3,
-        "trend4": t.trend4,
-        "trend5": t.trend5,
-        "ip_address": t.ip_address,
-        "scraped_at": t.run_timestamp.isoformat()
-    })
+    try:
+        t = TrendRun.objects.order_by("-run_timestamp").first()
+        if not t:
+            return JsonResponse({"error": "No trends found"}, status=404)
+
+        return JsonResponse({
+            "unique_id": str(t.id) if t.id else None,
+            "trends": [t.trend1, t.trend2, t.trend3, t.trend4, t.trend5],
+            "ip_address": t.ip_address,
+            "scraped_at": t.run_timestamp.isoformat() if t.run_timestamp else None
+        })
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 RENDER_WORKER_URL = os.getenv("RENDER_WORKER_URL")  # e.g. https://my-scraper.onrender.com/trigger-scrape
 RENDER_SECRET_TOKEN = os.getenv("RENDER_SECRET_TOKEN")
