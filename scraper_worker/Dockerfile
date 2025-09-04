@@ -23,7 +23,7 @@ WORKDIR /app
 COPY . /app
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r scraper_worker/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Start scraper
 CMD ["python", "scraper_worker/scraper.py"]
