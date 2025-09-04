@@ -26,4 +26,4 @@ COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Start scraper
-CMD ["python", "scraper_worker/scraper.py"]
+CMD ["python", "scraper.py"]
