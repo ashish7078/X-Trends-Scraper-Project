@@ -3,10 +3,5 @@ services:
     name: scraper-worker
     env: python
     plan: free
-    buildCommand: |
-      apt-get update
-      apt-get install -y chromium chromium-driver
-      find /usr -name chromedriver || true
-      find /usr -name chromium || true
-      pip install -r scraper_worker/requirements.txt
+    buildCommand: pip install -r scraper_worker/requirements.txt
     startCommand: python scraper_worker/scraper.py

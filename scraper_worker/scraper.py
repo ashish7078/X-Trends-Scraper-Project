@@ -2,10 +2,14 @@ import os
 import time
 import json
 import psycopg2
-import undetected_chromedriver as uc
+# import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from dotenv import load_dotenv
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
 
@@ -15,12 +19,14 @@ X_PASSWORD = os.getenv("X_PASSWORD")
 DATABASE_URL = os.getenv("DATABASE_URL")  # NeonDB connection string
 
 def create_driver():
-    options = uc.ChromeOptions()
-    options.binary_location = "/usr/bin/chromium"
-    options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    return uc.Chrome(driver_executable_path="/usr/lib/chromium-browser/chromedriver", options=options)
+    chrome_options = Options()
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    return driver
 
 def login_and_save_cookies(driver):
     driver.get("https://x.com/login")
