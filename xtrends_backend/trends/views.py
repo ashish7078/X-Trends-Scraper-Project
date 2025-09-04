@@ -4,7 +4,6 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from .models import TrendRun
-from . import scraper
 # try:
 #     from scraper import main as run_scrape
 # except Exception:
@@ -26,25 +25,25 @@ def latest_trends(request):
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
-RENDER_WORKER_URL = os.getenv("RENDER_WORKER_URL")  # e.g. https://my-scraper.onrender.com/trigger-scrape
-RENDER_SECRET_TOKEN = os.getenv("RENDER_SECRET_TOKEN")
+# RENDER_WORKER_URL = os.getenv("RENDER_WORKER_URL")  # e.g. https://my-scraper.onrender.com/trigger-scrape
+# RENDER_SECRET_TOKEN = os.getenv("RENDER_SECRET_TOKEN")
 
-@csrf_exempt
-@require_POST
-def trigger_scrape(request):
-    try:
-        headers = {}
-        if RENDER_SECRET_TOKEN:
-            headers["Authorization"] = f"Bearer {RENDER_SECRET_TOKEN}"
+# @csrf_exempt
+# @require_POST
+# def trigger_scrape(request):
+#     try:
+#         headers = {}
+#         if RENDER_SECRET_TOKEN:
+#             headers["Authorization"] = f"Bearer {RENDER_SECRET_TOKEN}"
 
-        # Call Render worker
-        res = requests.post(RENDER_WORKER_URL, headers=headers, timeout=120)
-        res.raise_for_status()
-        data = res.json()
+#         # Call Render worker
+#         res = requests.post(RENDER_WORKER_URL, headers=headers, timeout=120)
+#         res.raise_for_status()
+#         data = res.json()
 
-        return JsonResponse(data)
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+#         return JsonResponse(data)
+#     except Exception as e:
+#         return JsonResponse({"status": "error", "message": str(e)}, status=500)
 # @csrf_exempt
 # @require_POST
 # def scrape_save_trend(request):
