@@ -22,16 +22,11 @@ def create_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-software-rasterizer")
-    return uc.Chrome(
-        options=options,
-        driver_executable_path="/usr/local/bin/chromedriver",
-        browser_executable_path="/usr/bin/google-chrome",
-        use_subprocess=True
-    )
+    driver = uc.Chrome(options=options, use_subprocess=True)
+    return driver
 
 def login(driver):
     driver.get("https://x.com/login")
-
     WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.NAME, "text")))
     driver.find_element(By.NAME, "text").send_keys(X_EMAIL, Keys.RETURN)
     time.sleep(2)
@@ -50,12 +45,11 @@ def login(driver):
 
 def get_driver_with_login():
     driver = create_driver()
-    driver = login(driver)
-    return driver
+    return login(driver)
 
 def fetch_top_trends(driver):
     driver.get("https://x.com/explore")
-    WebDriverWait(driver, 10).until(
+    WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.XPATH, '//div[@aria-label="Timeline: Explore"]'))
     )
 
@@ -83,18 +77,32 @@ def save_to_db(trends):
     cur.execute("""
         INSERT INTO trends_trendrun (trend1, trend2, trend3, trend4, trend5, ip_address, created_at)
         VALUES (%s, %s, %s, %s, %s, %s, NOW())
+        RETURNING id
     """, (trends[0], trends[1], trends[2], trends[3], trends[4], "127.0.0.1"))
 
+    trend_id = cur.fetchone()[0]
     conn.commit()
     cur.close()
     conn.close()
     print("🔥 Top 5 Trends saved to DB:", trends)
+    return trend_id
 
 def main():
-    driver = get_driver_with_login()
-    trends = fetch_top_trends(driver)
-    driver.quit()
-    save_to_db(trends)
+    try:
+        driver = get_driver_with_login()
+        trends = fetch_top_trends(driver)
+    except Exception as e:
+        print("❌ Error during scraping:", e)
+        trends = []
+    finally:
+        try:
+            driver.quit()
+        except:
+            pass
+
+    if trends:
+        return save_to_db(trends)
+    return None
 
 if __name__ == "__main__":
     main()
