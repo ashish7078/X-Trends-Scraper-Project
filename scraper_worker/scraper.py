@@ -22,7 +22,12 @@ def create_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-software-rasterizer")
-    driver = uc.Chrome(options=options, use_subprocess=True)
+    driver = uc.Chrome(
+        options=options,
+        driver_executable_path="/usr/local/bin/chromedriver",
+        browser_executable_path="/usr/bin/google-chrome",
+        use_subprocess=True
+    )
     return driver
 
 def login(driver):
