@@ -25,6 +25,10 @@ def create_driver():
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+
+    chrome_path = os.environ.get("CHROME_BIN", "/usr/bin/chromium")
+    options.binary_location = str(chrome_path)
+
     driver = uc.Chrome(options=options)
     return driver
 
