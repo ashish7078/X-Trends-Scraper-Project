@@ -1,2 +1,3 @@
 /xtrends_frontend/node_modules
 /scraper_worker/.env
+/xtrends_backend/.env
