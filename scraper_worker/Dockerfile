@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y wget unzip gnupg curl \
 && unzip chromedriver-linux64.zip -d /usr/local/bin/ \
 && mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver \
 && rm -rf chromedriver-linux64.zip /usr/local/bin/chromedriver-linux64 \
-
  # Cleanup
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
