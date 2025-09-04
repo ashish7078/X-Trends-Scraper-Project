@@ -25,12 +25,15 @@ def create_driver():
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-software-rasterizer")
 
-    chrome_path = os.environ.get("CHROME_BIN", "/usr/bin/chromium")
-    options.binary_location = str(chrome_path)
-
-    driver = uc.Chrome(options=options)
-    return driver
+    # Use system Chrome + system Chromedriver
+    return uc.Chrome(
+        options=options,
+        browser_executable_path="/usr/bin/google-chrome",
+        driver_executable_path="/usr/local/bin/chromedriver"
+    )
 
 
 def login_and_save_cookies(driver):
